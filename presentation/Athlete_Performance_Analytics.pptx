@@ -1,0 +1,149 @@
+Slide 1 — Title
+
+Athlete Performance Analytics Dashboard
+
+Team Members:
+
+Sajin
+Morisha
+Mohammed Ashfaq
+Sesha Sai
+Slide 2 — Problem Statement
+
+Explain the difficulty of manually tracking:
+
+Sprint times
+Training duration
+Distance
+Heart rate
+RPE
+Strength performance
+Slide 3 — Existing System
+Manual Records
+      ↓
+Excel Sheets
+      ↓
+Manual Calculations
+      ↓
+Difficult Analysis
+Slide 4 — Proposed Solution
+Java Application
+       ↓
+      JDBC
+       ↓
+Oracle Database
+       ↓
+SQL + PL/SQL
+       ↓
+Analytics Dashboard
+Slide 5 — Features
+Athlete management
+Training session management
+Workload calculation
+ACWR analysis
+Performance trends
+Personal bests
+Squad comparison
+Role-based access
+Slide 6 — ER Diagram
+
+Insert:
+
+diagrams/ER_Diagram.png
+Slide 7 — DFD
+
+Insert:
+
+diagrams/DFD.png
+Slide 8 — Normalization
+
+Explain:
+
+1NF
+
+Atomic values and no repeating groups.
+
+2NF
+
+Non-key attributes depend on the complete key.
+
+3NF
+
+Separate entities such as:
+
+Squad
+Athlete
+Metric
+Training Session
+Performance Record
+User
+Slide 9 — DBMS Implementation
+
+Show:
+
+Tables
+Constraints
+Views
+Functions
+Procedures
+Triggers
+Transactions
+Slide 10 — Analytics
+
+Show:
+
+Workload = Duration × RPE
+
+ACWR = Acute Workload / Chronic Workload
+
+Also show:
+
+Performance trends
+Personal best
+Squad average
+Athlete ranking
+Slide 11 — Java Implementation
+
+Show:
+
+Java
+ ↓
+JDBC
+ ↓
+Oracle
+
+And a screenshot of the application.
+
+Slide 12 — Dashboard
+
+Insert your screenshots.
+
+Slide 13 — Results
+
+Explain that the system can:
+
+Store athlete information
+Record training sessions
+Calculate workload
+Analyze performance
+Generate athlete comparisons
+Maintain audit records
+Slide 14 — Future Enhancement
+
+Possible future features:
+
+Web-based dashboard
+Mobile application
+Wearable integration
+Automated notifications
+Advanced statistical analysis
+Machine-learning-based forecasting
+Slide 15 — References
+
+Use:
+
+Oracle Database documentation
+Java documentation
+JDBC documentation
+Sports performance literature
+DBMS textbooks
