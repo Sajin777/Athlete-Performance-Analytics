@@ -1,0 +1,86 @@
+                         +----------------+
+                         |     SQUAD      |
+                         +----------------+
+                         | PK squad_id    |
+                         | squad_name     |
+                         | sport          |
+                         +-------+--------+
+                                 |
+                                 | 1
+                                 |
+                                 | M
+                         +-------v--------+
+                         |    ATHLETE     |
+                         +----------------+
+                         | PK athlete_id  |
+                         | first_name     |
+                         | last_name      |
+                         | gender         |
+                         | dob            |
+                         | position       |
+                         | squad_id FK    |
+                         +-------+--------+
+                                 |
+                                 | 1
+                                 |
+                                 | M
+                    +------------v-------------+
+                    |     TRAINING_SESSION     |
+                    +--------------------------+
+                    | PK session_id            |
+                    | athlete_id FK            |
+                    | session_date             |
+                    | session_type              |
+                    | duration_min             |
+                    | rpe                      |
+                    | workload                 |
+                    | distance_km              |
+                    | avg_heart_rate           |
+                    +------------+-------------+
+                                 |
+                                 | 1
+                                 |
+                                 | M
+                    +------------v-------------+
+                    | PERFORMANCE_RECORD       |
+                    +--------------------------+
+                    | PK performance_id        |
+                    | session_id FK            |
+                    | metric_id FK             |
+                    | metric_value             |
+                    +------------+-------------+
+                                 |
+                                 | M
+                                 |
+                                 | 1
+                         +-------v--------+
+                         |     METRIC     |
+                         +----------------+
+                         | PK metric_id   |
+                         | metric_name    |
+                         | unit           |
+                         | higher_better  |
+                         +----------------+
+
+
++----------------+
+|      USER      |
++----------------+
+| PK user_id     |
+| username       |
+| password_hash  |
+| role           |
+| athlete_id FK  |
++----------------+
+
+
++------------------+
+|    AUDIT_LOG     |
++------------------+
+| PK audit_id      |
+| table_name       |
+| operation        |
+| record_id        |
+| changed_by       |
+| changed_at       |
++------------------+
