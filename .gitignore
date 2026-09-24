@@ -1,0 +1,16 @@
+# Java compiled files
+*.class
+
+# Java output
+java-app/out/
+
+# Database configuration
+config.properties
+java-app/config.properties
+
+# VS Code
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
