@@ -147,10 +147,3 @@ Java Dashboard
 4. Configure database credentials.
 5. Compile the Java program.
 6. Run Main.java.
-
-## 11. Team Members
-
-- Sajin
-- Morisha
-- Mohammed Ashfaq
-- Sesha Sai
