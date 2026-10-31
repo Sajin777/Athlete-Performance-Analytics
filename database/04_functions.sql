@@ -1,28 +1,32 @@
-#WORKLOAD FUNCTION
-    
-CREATE OR REPLACE FUNCTION calculate_workload(
-    p_duration NUMBER,
-    p_rpe NUMBER
+DROP FUNCTION IF EXISTS calculate_workload;
+DROP FUNCTION IF EXISTS calculate_acwr;
+
+DELIMITER $$
+
+CREATE FUNCTION calculate_workload(
+    p_duration DECIMAL(10,2),
+    p_rpe DECIMAL(4,2)
 )
-RETURN NUMBER
-IS
+RETURNS DECIMAL(12,2)
+DETERMINISTIC
+NO SQL
 BEGIN
     RETURN p_duration * p_rpe;
-END;
-/
+END$$
 
-#ACWR Function
-CREATE OR REPLACE FUNCTION calculate_acwr(
-    p_acute NUMBER,
-    p_chronic NUMBER
+CREATE FUNCTION calculate_acwr(
+    p_acute DECIMAL(12,2),
+    p_chronic DECIMAL(12,2)
 )
-RETURN NUMBER
-IS
+RETURNS DECIMAL(12,2)
+DETERMINISTIC
+NO SQL
 BEGIN
-    IF p_chronic = 0 THEN
+    IF p_chronic IS NULL OR p_chronic = 0 THEN
         RETURN NULL;
     END IF;
 
     RETURN ROUND(p_acute / p_chronic, 2);
-END;
-/
+END$$
+
+DELIMITER ;
