@@ -1,95 +1,75 @@
-CREATE TABLE squad (
-    squad_id NUMBER PRIMARY KEY,
-    squad_name VARCHAR2(100) NOT NULL,
-    sport VARCHAR2(50) NOT NULL,
-    coach_name VARCHAR2(100)
-);
+CREATE TABLE IF NOT EXISTS squad (
+    squad_id INT PRIMARY KEY AUTO_INCREMENT,
+    squad_name VARCHAR(100) NOT NULL,
+    sport VARCHAR(50) NOT NULL,
+    coach_name VARCHAR(100)
+) ENGINE=InnoDB;
 
-CREATE TABLE athlete (
-    athlete_id NUMBER PRIMARY KEY,
-    squad_id NUMBER,
-    first_name VARCHAR2(50) NOT NULL,
-    last_name VARCHAR2(50),
+CREATE TABLE IF NOT EXISTS athlete (
+    athlete_id INT PRIMARY KEY AUTO_INCREMENT,
+    squad_id INT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50),
     dob DATE,
-    position VARCHAR2(50),
-    gender VARCHAR2(20),
+    position VARCHAR(50),
+    gender VARCHAR(20),
     join_date DATE,
-    status VARCHAR2(20),
-
+    status VARCHAR(20),
     CONSTRAINT fk_athlete_squad
-    FOREIGN KEY (squad_id)
-    REFERENCES squad(squad_id)
-);
+        FOREIGN KEY (squad_id) REFERENCES squad(squad_id)
+) ENGINE=InnoDB;
 
-CREATE TABLE app_user (
-    user_id NUMBER PRIMARY KEY,
-    athlete_id NUMBER,
-    username VARCHAR2(50) UNIQUE NOT NULL,
-    password_hash VARCHAR2(255) NOT NULL,
-    role VARCHAR2(20) NOT NULL,
-    status VARCHAR2(20),
-
+CREATE TABLE IF NOT EXISTS app_user (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    athlete_id INT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    status VARCHAR(20),
     CONSTRAINT fk_user_athlete
-    FOREIGN KEY (athlete_id)
-    REFERENCES athlete(athlete_id)
-);
+        FOREIGN KEY (athlete_id) REFERENCES athlete(athlete_id)
+) ENGINE=InnoDB;
 
-CREATE TABLE metric (
-    metric_id NUMBER PRIMARY KEY,
-    metric_name VARCHAR2(100) UNIQUE NOT NULL,
-    unit VARCHAR2(30),
-    description VARCHAR2(255),
+CREATE TABLE IF NOT EXISTS metric (
+    metric_id INT PRIMARY KEY AUTO_INCREMENT,
+    metric_name VARCHAR(100) UNIQUE NOT NULL,
+    unit VARCHAR(30),
+    description VARCHAR(255),
     higher_is_better CHAR(1)
-);
+) ENGINE=InnoDB;
 
-CREATE TABLE training_session (
-    session_id NUMBER PRIMARY KEY,
-    athlete_id NUMBER NOT NULL,
+CREATE TABLE IF NOT EXISTS training_session (
+    session_id INT PRIMARY KEY AUTO_INCREMENT,
+    athlete_id INT NOT NULL,
     session_date DATE NOT NULL,
-    session_type VARCHAR2(50),
-    duration_min NUMBER(6,2),
-    rpe NUMBER(3,1),
-    avg_heart_rate NUMBER(4),
-    notes VARCHAR2(500),
-
+    session_type VARCHAR(50),
+    duration_min DECIMAL(6,2),
+    rpe DECIMAL(3,1),
+    avg_heart_rate INT,
+    notes VARCHAR(500),
     CONSTRAINT fk_session_athlete
-    FOREIGN KEY (athlete_id)
-    REFERENCES athlete(athlete_id)
-);
+        FOREIGN KEY (athlete_id) REFERENCES athlete(athlete_id)
+) ENGINE=InnoDB;
 
-CREATE TABLE performance_record (
-    record_id NUMBER PRIMARY KEY,
-    session_id NUMBER NOT NULL,
-    metric_id NUMBER NOT NULL,
-    metric_value NUMBER(10,2),
-
+CREATE TABLE IF NOT EXISTS performance_record (
+    record_id INT PRIMARY KEY AUTO_INCREMENT,
+    session_id INT NOT NULL,
+    metric_id INT NOT NULL,
+    metric_value DECIMAL(10,2),
     CONSTRAINT fk_record_session
-    FOREIGN KEY (session_id)
-    REFERENCES training_session(session_id),
-
+        FOREIGN KEY (session_id) REFERENCES training_session(session_id),
     CONSTRAINT fk_record_metric
-    FOREIGN KEY (metric_id)
-    REFERENCES metric(metric_id),
+        FOREIGN KEY (metric_id) REFERENCES metric(metric_id),
+    CONSTRAINT uq_session_metric UNIQUE (session_id, metric_id)
+) ENGINE=InnoDB;
 
-    CONSTRAINT uq_session_metric
-    UNIQUE(session_id, metric_id)
-);
-
-CREATE TABLE audit_log (
-    audit_id NUMBER PRIMARY KEY,
-    table_name VARCHAR2(100),
-    record_id NUMBER,
-    operation VARCHAR2(20),
-    old_value VARCHAR2(4000),
-    new_value VARCHAR2(4000),
-    changed_by VARCHAR2(100),
-    changed_at TIMESTAMP
-);
-
-CREATE SEQUENCE squad_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE athlete_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE user_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE metric_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE session_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE performance_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE audit_seq START WITH 1 INCREMENT BY 1;
+CREATE TABLE IF NOT EXISTS audit_log (
+    audit_id INT PRIMARY KEY AUTO_INCREMENT,
+    table_name VARCHAR(100),
+    record_id INT,
+    operation VARCHAR(20),
+    old_value VARCHAR(4000),
+    new_value VARCHAR(4000),
+    changed_by VARCHAR(100),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
