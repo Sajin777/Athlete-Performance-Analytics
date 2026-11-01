@@ -8,6 +8,10 @@ java-app/out/
 config.properties
 java-app/config.properties
 
+# Env
+.env
+node_modules/
+
 # VS Code
 .vscode/
 
