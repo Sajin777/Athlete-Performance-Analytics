@@ -1,27 +1,27 @@
-package com.athlete;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
-public class DBConnection {
+public class DatabaseConnection {
 
-    private static final String URL =
-            "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+    public static void main(String[] args) {
 
-    private static final String USER =
-            "athlete";
+        String url = "jdbc:mysql://localhost:3306/athlete_performance";
+        String username = "root";
+        String password = "S*******";
 
-    private static final String PASSWORD =
-            "your_password";
+        try {
 
-    public static Connection getConnection()
-            throws SQLException {
+            Connection connection =
+                    DriverManager.getConnection(url, username, password);
 
-        return DriverManager.getConnection(
-                URL,
-                USER,
-                PASSWORD
-        );
+            System.out.println("Database connected successfully!");
+
+            connection.close();
+
+        } catch (Exception e) {
+
+            System.out.println("Database connection failed!");
+            e.printStackTrace();
+        }
     }
 }
