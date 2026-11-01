@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athlete Performance Analytics</title>
+
+    <style>
+        :root {
+            box-sizing: border-box;
+            --bg: #eaf0ee;
+            --card: #ffffff;
+            --ink: #12263a;
+            --mut: #5b6b7a;
+            --line: #cfd9d6;
+            --acc: #1b6a8f;
+            --accT: #ffffff;
+            --ok: #1f7a4d;
+            --warn: #b4690e;
+            --bad: #b3261e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #0f1a22;
+                --card: #17252f;
+                --ink: #e6eef2;
+                --mut: #93a5b2;
+                --line: #2a3d4a;
+                --acc: #4fb0d8;
+                --accT: #08202c;
+                --ok: #4cc38a;
+                --warn: #e8a24a;
+                --bad: #f07a72;
+            }
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.5 "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--ink);
+            color: var(--bg);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 0.2px;
+        }
+
+        header .who {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 18px 16px 40px;
+        }
+
+        .lanes {
+            height: 6px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--acc) 0 40px,
+                transparent 40px 48px
+            );
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        button,
+        select,
+        input {
+            font: inherit;
+            color: inherit;
+        }
+
+        nav button {
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        nav button.on {
+            background: var(--acc);
+            color: var(--accT);
+            border-color: var(--acc);
+        }
+
+        .btn {
+            padding: 9px 16px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--acc);
+            color: var(--accT);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn.alt {
+            background: transparent;
+            border: 1px solid currentColor;
+            color: inherit;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--warn);
+            outline-offset: 2px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 19px;
+        }
+
+        .tw {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 560px;
+        }
+
+        th,
+        td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        th {
+            color: var(--mut);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--mut);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 3px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--bg);
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .row > div {
+            min-width: 180px;
+            flex: 1;
+        }
+
+        .stat {
+            border-left: 4px solid var(--acc);
+            padding: 4px 12px;
+        }
+
+        .stat b {
+            display: block;
+            font-size: 24px;
+        }
+
+        .stat span {
+            color: var(--mut);
+            font-size: 13px;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #ffffff;
+        }
+
+        .NORMAL {
+            background: var(--ok);
+        }
+
+        .HIGH {
+            background: var(--bad);
+        }
+
+        .LOW {
+            background: var(--warn);
+        }
+
+        .NA {
+            background: var(--mut);
+        }
+
+        .msg {
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            background: var(--bg);
+            border: 1px solid var(--line);
+        }
+
+        .err {
+            color: var(--bad);
+        }
+
+        .note {
+            color: var(--mut);
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .bar {
+            height: 14px;
+            background: var(--line);
+            border-radius: 7px;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .bar i {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: var(--acc);
+            border-radius: 7px;
+        }
+
+        .login {
+            max-width: 380px;
+            margin: 40px auto;
+        }
+
+        .demo {
+            font-size: 13px;
+            color: var(--mut);
+            margin: 0 0 14px;
+            padding-left: 18px;
+        }
+        /* Password visibility eye icon */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-container input {
+    padding-right: 45px;
+}
+
+.eye-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--mut);
+    cursor: pointer;
+}
+
+.eye-button.active {
+    color: white;
+    background: var(--acc);
+}
+
+.eye-button:hover {
+    color: white;
+    background: var(--acc);
+}
+    </style>
+</head>
+
+<body>
+    <div class="lanes"></div>
+
+    <header>
+        <h1>Athlete Performance Analytics</h1>
+        <div class="who" id="who"></div>
+    </header>
+
+    <main id="app"></main>
+
+    <script>
+        /* ---------- Data Model ---------- */
+
+async function loadAthletesFromDatabase() {
+    try {
+        const response = await fetch("/api/athletes");
+
+        if (!response.ok) {
+            throw new Error("Failed to retrieve athletes");
+        }
+
+        const athletes = await response.json();
+
+        console.log("Athletes retrieved from MySQL:", athletes);
+
+        return athletes;
+
+    } catch (error) {
+        console.error("Error:", error.message);
+
+        alert("Unable to load athletes from MySQL.");
+
+        return [];
+    }
+}
+loadAthletesFromDatabase();
+
+        const DAY = 864e5;
+
+        const iso = d => d.toISOString().slice(0, 10);
+
+        const today = () => {
+            const d = new Date();
+
+            return new Date(
+                Date.UTC(
+                    d.getFullYear(),
+                    d.getMonth(),
+                    d.getDate()
+                )
+            );
+        };
+
+        const daysBetween = (a, b) => {
+            return Math.round(
+                (
+                    new Date(b + "T00:00:00Z") -
+                    new Date(a + "T00:00:00Z")
+                ) / DAY
+            );
+        };
+
+        const ago = n => iso(new Date(today() - n * DAY));
+
+        const users = [
+    {
+        id: 1,
+        username: "admin",
+        password: "admin123",
+        role: "ADMIN"
+    },
+    {
+        id: 2,
+        username: "coach",
+        password: "coach123",
+        role: "COACH"
+    },
+    {
+        id: 8,
+        username: "coach2",
+        password: "coach234",
+        role: "COACH"
+    },
+    {
+        id: 9,
+        username: "coach3",
+        password: "coach345",
+        role: "COACH"
+    }
+];
+        let athlete = [
+            {
+                id: 3,
+                username: "arun",
+                password: "arun123",
+                role: "ATHLETE",
+                athleteId: 1
+            },
+            {
+                id: 4,
+                username: "rahul",
+                password: "rahul123",
+                role: "ATHLETE",
+                athleteId: 2
+            },
+            {
+                id: 5,
+                username: "akash",
+                password: "akash123",
+                role: "ATHLETE",
+                athleteId: 3
+            },
+            {
+                id: 6,
+                username: "suresh",
+                password: "suresh123",
+                role: "ATHLETE",
+                athleteId: 4
+            },
+            {
+                id: 7,
+                username: "vijay",
+                password: "vijay123",
+                role: "ATHLETE",
+                athleteId: 5
+            }
+        ];
+
+        let athletes = [
+    {
+        id: 1,
+        name: "Arun Kumar",
+        age: 21,
+        event: "200m",
+        category: "Senior",
+        coachId: 2
+    },
+    {
+        id: 2,
+        name: "Rahul Kumar",
+        age: 22,
+        event: "400m",
+        category: "Senior",
+        coachId: 2
+    },
+    {
+        id: 3,
+        name: "Akash Raj",
+        age: 20,
+        event: "100m",
+        category: "Senior",
+        coachId: 8
+    },
+    {
+        id: 4,
+        name: "Suresh B",
+        age: 21,
+        event: "1000m",
+        category: "Senior",
+        coachId: 8
+    },
+    {
+        id: 5,
+        name: "Vijay Kumar",
+        age: 19,
+        event: "1500m",
+        category: "Junior",
+        coachId: 9
+    }
+];
+
+        let sessions = [];
+        let nextId = 1;
+
+        const add = (
+            a,
+            d,
+            dur,
+            rpe,
+            sp,
+            di,
+            w,
+            hr,
+            type = "TRAINING"
+        ) => {
+            sessions.push({
+                id: nextId++,
+                athleteId: a,
+                date: ago(d),
+                type,
+                duration: dur,
+                rpe,
+                sprint: sp,
+                distance: di,
+                weight: w,
+                hr
+            });
+        };
+
+        [
+            [1, 1, 60, 7, 11.60, 8.2, 100, 155],
+            [1, 3, 70, 8, 11.55, 9.1, 105, 160],
+            [1, 5, 55, 6, 11.70, 7.5, 95, 150],
+            [1, 8, 60, 7, 11.65, 8.0, 105, 153],
+            [1, 12, 65, 7, 11.58, 8.5, 110, 156],
+            [1, 18, 50, 6, 11.80, 7.0, 90, 148],
+            [1, 25, 55, 6, 11.75, 7.5, 95, 150],
+            [2, 1, 90, 9, 11.30, 10.5, 120, 170],
+            [2, 3, 80, 8, 11.40, 9.8, 115, 168],
+            [2, 5, 85, 9, 11.35, 10.0, 118, 172],
+            [2, 10, 60, 6, 11.50, 8.0, 100, 155],
+            [3, 2, 50, 6, 12.10, 7.0, 90, 145],
+            [3, 7, 55, 6, 12.00, 7.5, 95, 148],
+            [4, 2, 65, 7, 11.90, 8.0, 100, 150],
+            [4, 9, 60, 7, 11.95, 7.8, 95, 151]
+        ].forEach(r => add(...r));
+
+
+        const workload = s => s.duration * s.rpe;
+
+        const findAthlete = id => {
+            return athletes.find(a => a.id === id);
+        };
+
+        function visibleAthletes() {
+    // Admin can see every athlete.
+    if (user.role === "ADMIN") {
+        return athletes;
+    }
+
+    if (user.role === "COACH") {
+        return athletes.filter(
+            a => a.coachId === user.id
+        );
+    }
+
+    // Athletes can see only their own profile.
+    return athletes.filter(
+        a => a.id === user.athleteId
+    );
+}
+
+        function sumWindow(id, date, lo, hi) {
+            let total = 0;
+
+            for (const s of sessions) {
+                if (s.athleteId === id) {
+                    const d = daysBetween(s.date, date);
+
+                    if (d >= lo && d <= hi) {
+                        total += workload(s);
+                    }
+                }
+            }
+
+            return total;
+        }
+
+        const acute = (id, date) => {
+            return sumWindow(id, date, 0, 6);
+        };
+
+        const chronic = (id, date) => {
+            return sumWindow(id, date, 7, 34);
+        };
+
+        function acwr(id, date) {
+            const avg = chronic(id, date) / 4;
+
+            return avg === 0 ? 0 : acute(id, date) / avg;
+        }
+
+        function status(v) {
+            if (v === 0) {
+                return ["INSUFFICIENT DATA", "NA"];
+            }
+
+            if (v > 1.5) {
+                return ["HIGH WORKLOAD", "HIGH"];
+            }
+
+            if (v >= 0.8) {
+                return ["NORMAL", "NORMAL"];
+            }
+
+            return ["LOW WORKLOAD", "LOW"];
+        }
+
+        function categoryComparison(id) {
+            const athlete = findAthlete(id);
+
+            if (!athlete) {
+                return null;
+            }
+
+            const totals = visibleAthletes()
+    .filter(
+        a =>
+            a.category.toLowerCase() ===
+            athlete.category.toLowerCase()
+    )
+                .map(a => ({
+                    id: a.id,
+                    total: sessions
+                        .filter(s => s.athleteId === a.id)
+                        .reduce(
+                            (total, s) => total + workload(s),
+                            0
+                        )
+                }));
+
+            const mine = totals.find(x => x.id === id).total;
+
+            const avg = totals.reduce(
+                (total, item) => total + item.total,
+                0
+            ) / totals.length;
+
+            const pct =
+                totals.filter(x => x.total <= mine).length /
+                totals.length * 100;
+
+            return {
+                athlete,
+                mine,
+                avg,
+                pct,
+                n: totals.length
+            };
+        }
+
+        function personalBests(id) {
+            const list = sessions.filter(
+                s => s.athleteId === id
+            );
+
+            if (!list.length) {
+                return null;
+            }
+
+            return {
+                sprint: Math.min(
+                    ...list.map(s => s.sprint)
+                ),
+                distance: Math.max(
+                    ...list.map(s => s.distance)
+                ),
+                weight: Math.max(
+                    ...list.map(s => s.weight)
+                ),
+                hr: Math.min(
+                    ...list.map(s => s.hr)
+                )
+            };
+        }
+
+
+        /* ---------- UI Helpers ---------- */
+
+        let user = null;
+        let tab = null;
+        let athleteSel = null;
+
+        const $ = selector => {
+            return document.querySelector(selector);
+        };
+
+        const esc = s => {
+            return String(s).replace(
+                /[&<>"]/g,
+                c => ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;"
+                })[c]
+            );
+        };
+
+        const f2 = n => Number(n).toFixed(2);
+
+        const tabsFor = {
+            ADMIN: [
+                ["athletes", "Athletes"],
+                ["add-athlete", "Add athlete"],
+                ["add-coach", "Add coach"],
+                ["sessions", "All sessions"]
+            ],
+
+            COACH: [
+                ["athletes", "Athletes"],
+                ["add-athlete", "Add athlete"],
+                ["add-session", "Add session"],
+                ["perf", "Performance"],
+                ["acwr", "ACWR"],
+                ["category", "Category comparison"],
+                ["bests", "Personal bests"],
+                ["sessions", "All sessions"]
+            ],
+
+            ATHLETE: [
+                ["perf", "My performance"],
+                ["acwr", "My ACWR"],
+                ["bests", "My personal bests"]
+            ]
+        };
+
+        const needsPicker = t => {
+            return ["perf", "acwr", "category", "bests"].includes(t);
+        };
+
+        function picker() {
+            if (user.role === "ATHLETE") {
+                return "";
+            }
+
+            return `
+                <div class="row">
+                    <div>
+                        <label for="pick">Athlete</label>
+
+                        <select id="pick">
+                            ${athletes.map(a => `
+                                <option
+                                    value="${a.id}"
+                                    ${a.id === athleteSel ? "selected" : ""}
+                                >
+                                    ${a.id} — ${esc(a.name)}
+                                </option>
+                            `).join("")}
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ---------- Add Coach ---------- */
+
+function addCoachView() {
+    return `
+        <div class="card">
+            <h2>Add New Coach</h2>
+
+            <form id="cf">
+                <div class="grid">
+                    <div>
+                        <label for="cu">Coach Username</label>
+                        <input
+                            id="cu"
+                            type="text"
+                            required
+                            minlength="3"
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="cp">Password</label>
+                        <input
+                            id="cp"
+                            type="password"
+                            required
+                            minlength="8"
+                            autocomplete="new-password"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="cp2">Confirm Password</label>
+                        <input
+                            id="cp2"
+                            type="password"
+                            required
+                            minlength="8"
+                            autocomplete="new-password"
+                        >
+                    </div>
+                </div>
+
+                <p id="cm" role="status"></p>
+
+                <button class="btn" type="submit">
+                    Create Coach Account
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Registered Coaches</h2>
+
+            ${table(
+                ["ID", "Username", "Role"],
+                users
+                    .filter(u => u.role === "COACH")
+                    .map(u => [
+                        u.id,
+                        esc(u.username),
+                        u.role
+                    ])
+            )}
+        </div>
+    `;
+}
+
+function coachListView() {
+    if (user.role !== "ADMIN") {
+        return "";
+    }
+
+    const coaches = users.filter(u => u.role === "COACH");
+
+    return `
+        <h2>Manage Coaches</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Coach ID</th>
+                    <th>Username</th>
+                    <th>Assigned Athletes</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                ${coaches.map(c => {
+                    const count = athletes.filter(
+                        a => a.coachId === c.id
+                    ).length;
+
+                    return `
+                        <tr>
+                            <td>${c.id}</td>
+                            <td>${esc(c.username)}</td>
+                            <td>${count}</td>
+                            <td>
+                                <button
+                                    class="danger"
+                                    onclick="deleteCoach(${c.id})">
+                                    Delete Coach
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("")}
+            </tbody>
+        </table>
+
+        ${coaches.length === 0 ? "<p>No coaches available.</p>" : ""}
+    `;
+}
+
+function deleteCoach(id) {
+
+    // Only Admin can delete coaches.
+    if (!user || user.role !== "ADMIN") {
+        alert("Only admin can delete coaches.");
+        return;
+    }
+
+    // Find the coach.
+    const coach = users.find(
+        u => u.id === id && u.role === "COACH"
+    );
+
+    if (!coach) {
+        alert("Coach not found.");
+        return;
+    }
+
+    // Count athletes assigned to this coach.
+    const assignedCount = athletes.filter(
+        a => a.coachId === id
+    ).length;
+
+    const confirmed = confirm(
+        `Are you sure you want to delete coach ${coach.username}?\n\n` +
+        `${assignedCount} athlete(s) will become unassigned.`
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    // Delete the coach account.
+    users = users.filter(
+        u => !(u.id === id && u.role === "COACH")
+    );
+
+    // Unassign the athletes previously assigned to this coach.
+    athletes = athletes.map(a => {
+        if (a.coachId === id) {
+            return {
+                ...a,
+                coachId: null
+            };
+        }
+
+        return a;
+    });
+
+    alert("Coach deleted successfully.");
+
+    render();
+}
+
+
+function submitCoach(e) {
+    e.preventDefault();
+
+    // Only the admin can create coach accounts
+    if (!user || user.role !== "ADMIN") {
+        return;
+    }
+
+    const username = $("#cu").value.trim();
+    const password = $("#cp").value;
+    const confirmPassword = $("#cp2").value;
+    const message = $("#cm");
+
+    // Check whether the username already exists
+    const exists = users.some(
+        u => u.username.toLowerCase() === username.toLowerCase()
+    );
+
+    if (exists) {
+        message.className = "err";
+        message.textContent =
+            "This username already exists. Choose another username.";
+        return;
+    }
+
+    // Validate the password
+    if (password.length < 8) {
+        message.className = "err";
+        message.textContent =
+            "Password must contain at least 8 characters.";
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        message.className = "err";
+        message.textContent =
+            "Passwords do not match.";
+        return;
+    }
+
+    // Generate a unique account ID
+    const id = users.length
+        ? Math.max(...users.map(u => u.id)) + 1
+        : 1;
+
+    // Create the new coach account
+    const newCoach = {
+        id: id,
+        username: username,
+        password: password,
+        role: "COACH"
+    };
+
+    // Add and save the account
+    users.push(newCoach);
+
+    try {
+        localStorage.setItem(
+            "apaUsers",
+            JSON.stringify(users)
+        );
+    } catch (error) {
+        // Undo the in-memory addition if saving fails
+        users.pop();
+
+        message.className = "err";
+        message.textContent =
+            "Unable to save the account in this browser.";
+        return;
+    }
+
+    // Refresh the page content to show the new coach
+    render();
+
+    // Display a success message on the refreshed form
+    $("#cm").textContent =
+        "Coach account created successfully!";
+}
+
+        function render() {
+            const who = $("#who");
+            const app = $("#app");
+
+            if (!user) {
+                who.innerHTML = "";
+                app.innerHTML = loginView();
+                $("#lf").onsubmit = login;
+                const passwordInput = $("#p");
+const togglePassword = $("#togglePassword");
+
+togglePassword.onclick = function () {
+    const isHidden = passwordInput.type === "password";
+
+    passwordInput.type = isHidden ? "text" : "password";
+
+    this.classList.toggle("active", isHidden);
+
+    this.setAttribute(
+        "aria-label",
+        isHidden ? "Hide password" : "Show password"
+    );
+};
+                return;
+            }
+
+            who.innerHTML = `
+                <span>
+                    ${esc(user.username)} · ${user.role}
+                </span>
+
+                <button class="btn alt" id="out">
+                    Log out
+                </button>
+            `;
+
+            $("#out").onclick = () => {
+                user = null;
+                tab = null;
+                render();
+            };
+
+            if (!tab) {
+                tab = tabsFor[user.role][0][0];
+            }
+
+           if (user.role === "ATHLETE") {
+    athleteSel = user.athleteId;
+} else {
+    const list = visibleAthletes();
+
+    if (!list.some(a => a.id === athleteSel)) {
+        athleteSel = list[0]?.id ?? null;
+    }
+}
+
+            app.innerHTML = `
+                <nav>
+                    ${tabsFor[user.role].map(([key, label]) => `
+                        <button
+                            data-t="${key}"
+                            class="${key === tab ? "on" : ""}"
+                        >
+                            ${label}
+                        </button>
+                    `).join("")}
+                </nav>
+
+                ${
+                    needsPicker(tab)
+                        ? `
+                            <div class="card">
+                                ${picker()}
+                                <div id="out2"></div>
+                            </div>
+                        `
+                        : `<div id="out2"></div>`
+                }
+            `;
+
+            app.querySelectorAll("nav button").forEach(button => {
+                button.onclick = () => {
+                    tab = button.dataset.t;
+                    render();
+                };
+            });
+
+            const p = $("#pick");
+
+            if (p) {
+                p.onchange = () => {
+                    athleteSel = +p.value;
+                    render();
+                };
+            }
+
+            const views = {
+                athletes: athletesView,
+                "add-athlete": addAthleteView,
+                "add-coach": addCoachView,
+                "add-session": addSessionView,
+                perf: perfView,
+                acwr: acwrView,
+                category: categoryView,
+                bests: bestsView,
+                sessions: sessionsView
+            };
+
+            $("#out2").innerHTML = views[tab]();
+
+            const af = $("#af");
+
+            if (af) {
+                af.onsubmit = submitAthlete;
+            }
+
+            const cf = $("#cf");
+            if (cf) {
+                cf.onsubmit = submitCoach;
+            }
+
+            const sf = $("#sf");
+
+            if (sf) {
+                sf.onsubmit = submitSession;
+            }
+        }
+
+
+        /* ---------- Login ---------- */
+
+        function loginView() {
+            return `
+                <div class="card login">
+                    <h2>Sign in</h2>
+
+                    <ul class="demo">
+                    </ul>
+
+                    <form id="lf">
+                        <label for="u">Username</label>
+
+                        <input
+                            id="u"
+                            autocomplete="username"
+                            required
+                        >
+
+                        <div style="height: 10px"></div>
+                            <label for="p">Password</label>
+
+                        <div class="password-container">
+                        <input
+                            id="p"
+                            type="password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="eye-button"
+                            aria-label="Show password"
+                            title="Show or hide password"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="22"
+                                height="22"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                        <p
+                            id="le"
+                            class="err"
+                            role="alert"
+                        ></p>
+
+                        <button class="btn" type="submit">
+                            Sign in
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function login(e) {
+    e.preventDefault();
+
+    const username = $("#u").value.trim();
+    const password = $("#p").value;
+
+    // Step 1: Check administrator and coach accounts
+    const foundUser = users.find(
+        u =>
+            u.username === username &&
+            u.password === password
+    );
+
+    if (foundUser) {
+        user = foundUser;
+        tab = null;
+        render();
+        return;
+    }
+
+    // Step 2: Check athlete accounts
+    const foundAthlete = athlete.find(
+        a =>
+            a.username === username &&
+            a.password === password
+    );
+
+    if (foundAthlete) {
+        // Create the athlete's login session
+        user = {
+            id: foundAthlete.id,
+            username: foundAthlete.username,
+            role: "ATHLETE",
+            athleteId: foundAthlete.athleteId
+        };
+
+        tab = null;
+        athleteSel = foundAthlete.athleteId;
+
+        render();
+        return;
+    }
+
+    // Step 3: Display an error if the credentials are incorrect
+    $("#le").textContent = "Invalid username or password.";
+}
+
+        /* ---------- Tables and Athlete Views ---------- */
+
+        function table(head, rows) {
+            return `
+                <div class="tw">
+                    <table>
+                        <thead>
+                            <tr>
+                                ${head.map(h => `<th>${h}</th>`).join("")}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${rows.map(row => `
+                                <tr>
+                                    ${row.map(
+                                        cell => `<td>${cell}</td>`
+                                    ).join("")}
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function athletesView() {
+    const list = visibleAthletes();
+
+    return `
+        <h2>${user.role === "ADMIN" ? "All Athletes" : "My Assigned Athletes"}</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Event</th>
+                    <th>Category</th>
+                    ${user.role === "ADMIN" ?
+    "<th>Coach</th>" : ""}
+
+${user.role === "ADMIN" || user.role === "COACH" ?
+    "<th>Action</th>" :
+    "<th>Action</th>"
+}
+                </tr>
+            </thead>
+            <tbody>
+                ${list.map(a => {
+                    const coach = users.find(
+                        u => u.id === a.coachId && u.role === "COACH"
+                    );
+
+                    return `
+                        <tr>
+                            <td>${a.id}</td>
+                            <td>${esc(a.name)}</td>
+                            <td>${a.age}</td>
+                            <td>${esc(a.event)}</td>
+                            <td>${esc(a.category)}</td>
+
+                            ${user.role === "ADMIN" ? `
+    <td>
+        ${coach ? esc(coach.username) : "Not assigned"}
+    </td>
+` : ""}
+
+${user.role === "ADMIN" || user.role === "COACH" ? `
+    <td>
+        <button
+            class="danger"
+            onclick="deleteAthlete(${a.id})">
+            Delete
+        </button>
+    </td>
+` : ""}
+                        </tr>
+                    `;
+                }).join("")}
+            </tbody>
+        </table>
+
+        ${list.length === 0 ? "<p>No athletes found.</p>" : ""}
+    `;
+}
+
+        function sessionsView() {
+    const allowedAthletes = visibleAthletes();
+
+    const allowedIds = new Set(
+        allowedAthletes.map(a => a.id)
+    );
+
+    const list = sessions.filter(
+        s => allowedIds.has(s.athleteId)
+    );
+
+    return `
+        <div class="card">
+            <h2>
+                ${user.role === "ADMIN"
+                    ? "All Training Sessions"
+                    : "Training Sessions"}
+            </h2>
+
+            ${table(
+                [
+                    "ID",
+                    "Athlete",
+                    "Date",
+                    "Type",
+                    "Duration",
+                    "RPE",
+                    "Sprint",
+                    "Distance",
+                    "Weight",
+                    "HR"
+                ],
+
+                list.map(s => [
+                    s.id,
+                    esc(
+                        findAthlete(s.athleteId)?.name || ""
+                    ),
+                    s.date,
+                    esc(s.type),
+                    s.duration,
+                    s.rpe,
+                    s.sprint,
+                    s.distance,
+                    s.weight,
+                    s.hr
+                ])
+            )}
+        </div>
+    `;
+}
+
+        function stat(value, label) {
+            return `
+                <div class="stat">
+                    <b>${value}</b>
+                    <span>${label}</span>
+                </div>
+            `;
+        }
+
+        function perfView() {
+            const athlete = findAthlete(athleteSel);
+
+            if (!athlete) {
+                return `
+                    <div class="card">
+                        Athlete not found.
+                    </div>
+                `;
+            }
+
+            const list = sessions
+                .filter(s => s.athleteId === athlete.id)
+                .sort((x, y) => y.date.localeCompare(x.date));
+
+            return `
+                <div class="card">
+                    <h2>${esc(athlete.name)}</h2>
+
+                    <p class="note" style="margin: 0 0 12px">
+                        ${esc(athlete.event)} ·
+                        ${esc(athlete.category)}
+                    </p>
+
+                    ${
+                        list.length
+                            ? table(
+                                [
+                                    "Date",
+                                    "Session",
+                                    "Duration (min)",
+                                    "RPE",
+                                    "Workload (AU)",
+                                    "Sprint (s)",
+                                    "Distance (km)",
+                                    "Weight (kg)",
+                                    "Heart rate (bpm)"
+                                ],
+
+                                list.map(s => [
+                                    s.date,
+                                    esc(s.type),
+                                    s.duration,
+                                    s.rpe,
+                                    f2(workload(s)),
+                                    f2(s.sprint),
+                                    f2(s.distance),
+                                    f2(s.weight),
+                                    f2(s.hr)
+                                ])
+                            )
+                            : "No training records found."
+                    }
+                </div>
+            `;
+        }
+
+
+        function acwrView() {
+            const athlete = findAthlete(athleteSel);
+
+            if (!athlete) {
+                return `
+                    <div class="card">
+                        Athlete not found.
+                    </div>
+                `;
+            }
+
+            const date = iso(today());
+            const ac = acute(athlete.id, date);
+            const ch = chronic(athlete.id, date);
+            const value = acwr(athlete.id, date);
+            const [statusText, statusClass] = status(value);
+
+            return `
+                <div class="card">
+                    <h2>
+                        ACWR analysis — ${esc(athlete.name)}
+                    </h2>
+
+                    <div class="grid">
+                        ${stat(f2(ac) + " AU", "7-day acute workload")}
+                        ${stat(f2(ch) + " AU", "28-day workload")}
+                        ${stat(f2(ch / 4) + " AU", "28-day average weekly")}
+                        ${stat(value === 0 ? "—" : f2(value), "ACWR")}
+                    </div>
+
+                    <p>
+                        <span class="pill ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </p>
+
+                    <p class="note">
+                        ACWR = acute workload ÷ average weekly workload
+                        of the previous 28 days. Healthy range here:
+                        0.8–1.5. It is a workload monitoring indicator,
+                        not a diagnosis.
+                    </p>
+                </div>
+            `;
+        }
+
+
+        function categoryView() {
+            const result = categoryComparison(athleteSel);
+
+            if (!result) {
+                return `
+                    <div class="card">
+                        Athlete not found.
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="card">
+                    <h2>
+                        Category comparison — ${esc(result.athlete.name)}
+                    </h2>
+
+                    <p class="note" style="margin: 0 0 12px">
+                        ${esc(result.athlete.category)} ·
+                        ${result.n} athlete${result.n > 1 ? "s" : ""}
+                    </p>
+
+                    <div class="grid">
+                        ${stat(
+                            f2(result.mine) + " AU",
+                            "Athlete total workload"
+                        )}
+
+                        ${stat(
+                            f2(result.avg) + " AU",
+                            "Category average workload"
+                        )}
+
+                        ${stat(
+                            f2(result.pct) + "%",
+                            "Category percentile"
+                        )}
+                    </div>
+
+                    <div
+                        class="bar"
+                        role="img"
+                        aria-label="Percentile ${f2(result.pct)} percent"
+                    >
+                        <i style="width: ${result.pct}%"></i>
+                    </div>
+                </div>
+            `;
+        }
+
+        function bestsView() {
+            const athlete = findAthlete(athleteSel);
+
+            if (!athlete) {
+                return `
+                    <div class="card">
+                        Athlete not found.
+                    </div>
+                `;
+            }
+
+            const bests = personalBests(athlete.id);
+
+            return `
+                <div class="card">
+                    <h2>
+                        Personal bests — ${esc(athlete.name)}
+                    </h2>
+
+                    ${
+                        bests
+                            ? `
+                                <div class="grid">
+                                    ${stat(
+                                        f2(bests.sprint) + " s",
+                                        "Best sprint time"
+                                    )}
+
+                                    ${stat(
+                                        f2(bests.distance) + " km",
+                                        "Longest distance"
+                                    )}
+
+                                    ${stat(
+                                        f2(bests.weight) + " kg",
+                                        "Highest weight"
+                                    )}
+
+                                    ${stat(
+                                        f2(bests.hr) + " bpm",
+                                        "Lowest heart rate"
+                                    )}
+                                </div>
+                            `
+                            : "No performance data available."
+                    }
+                </div>
+            `;
+        }
+
+
+        function field(
+            id,
+            label,
+            type = "text",
+            extra = ""
+        ) {
+            return `
+                <div>
+                    <label for="${id}">${label}</label>
+
+                    <input
+                        id="${id}"
+                        type="${type}"
+                        ${extra}
+                        required
+                    >
+                </div>
+            `;
+        }
+
+        function addAthleteView() {
+    return `
+        <div class="card">
+            <h2>Add Athlete</h2>
+
+            <form id="af">
+                <div class="grid">
+
+                    ${field(
+                        "aid",
+                        "Athlete ID",
+                        "number",
+                        "min=1"
+                    )}
+
+                    ${field(
+                        "an",
+                        "Name"
+                    )}
+
+                    ${field(
+                        "aa",
+                        "Age",
+                        "number",
+                        "min=10 max=60"
+                    )}
+
+                    ${field(
+                        "ap",
+                        "Event"
+                    )}
+
+                    ${field(
+                        "as",
+                        "Category"
+                    )}
+
+                    ${field(
+                        "au",
+                        "Username"
+                    )}
+
+                    ${field(
+                        "apw",
+                        "Password",
+                        "password",
+                        'minlength="6"'
+                    )}
+                    <div>
+    ${user.role === "ADMIN" ? `
+        <label for="ac">Assign Coach</label>
+
+        <select id="ac" required>
+            <option value="">Select a coach</option>
+
+            ${users
+                .filter(u => u.role === "COACH")
+                .map(u => `
+                    <option value="${u.id}">
+                        ${esc(u.username)}
+                    </option>
+                `)
+                .join("")}
+        </select>
+    ` : `
+        <label>Assigned Coach</label>
+
+        <input
+            type="text"
+            value="${esc(user.username)}"
+            readonly
+        >
+
+        
+    `}
+</div>
+                </div>
+
+                <p id="am" role="status"></p>
+
+                <button class="btn" type="submit">
+                    Add Athlete
+                </button>
+            </form>
+        </div>
+    `;
+}
+
+function deleteAthlete(id) {
+
+    if (
+        !user ||
+        (user.role !== "ADMIN" && user.role !== "COACH")
+    ) {
+        alert("You are not authorized to delete athletes.");
+        return;
+    }
+
+    const athleteProfile = athletes.find(a => a.id === id);
+
+    if (!athleteProfile) {
+        alert("Athlete not found.");
+        return;
+    }
+
+    // Coach can delete only their assigned athletes.
+    if (
+        user.role === "COACH" &&
+        athleteProfile.coachId !== user.id
+    ) {
+        alert("You can delete only your assigned athletes.");
+        return;
+    }
+
+    const confirmed = confirm(
+        `Are you sure you want to delete ${athleteProfile.name}?`
+    );
+
+    if (!confirmed) return;
+
+    athletes = athletes.filter(a => a.id !== id);
+
+    athlete = athlete.filter(a => a.athleteId !== id);
+
+    sessions = sessions.filter(s => s.athleteId !== id);
+
+    if (athleteSel === id) {
+        athleteSel = athletes[0]?.id ?? null;
+    }
+
+    alert("Athlete deleted successfully.");
+
+    render();
+}
+
+        function submitAthlete(e) {
+    e.preventDefault();
+
+    const id = +$("#aid").value;
+    const name = $("#an").value.trim();
+    const age = +$("#aa").value;
+    const event = $("#ap").value.trim();
+    const category = $("#as").value.trim();
+    const username = $("#au").value.trim();
+    const password = $("#apw").value;
+    
+const coachId = user.role === "ADMIN"
+    ? Number($("#ac").value)
+    : user.role === "COACH"
+        ? user.id
+        : null;
+
+const message = $("#am");
+
+if (coachId === null) {
+    alert("You are not authorized to add athletes.");
+    return;
+}
+
+// Verify that the selected coach exists.
+const assignedCoach = users.find(
+    u => u.id === coachId && u.role === "COACH"
+);
+
+if (!assignedCoach) {
+    message.className = "err";
+    message.textContent = "Please select a valid coach.";
+    return;
+}
+
+
+    // Check whether the athlete ID already exists
+    if (findAthlete(id)) {
+        message.className = "err";
+        message.textContent =
+            "This athlete ID already exists.";
+
+        return;
+    }
+
+    // Check whether the username already exists
+    const usernameExists =
+        users.some(u => u.username === username) ||
+        athletes.some(a => a.username === username);
+
+    if (usernameExists) {
+        message.className = "err";
+        message.textContent =
+            "This username is already taken. Choose another.";
+
+        return;
+    }
+
+    // Check that the required text fields are not empty
+    if (
+        !name ||
+        !event ||
+        !category ||
+        !username ||
+        !password
+    ) {
+        message.className = "err";
+        message.textContent =
+            "Please fill in all the fields.";
+
+        return;
+    }
+
+    // Check the password length
+    if (password.length < 6) {
+        message.className = "err";
+        message.textContent =
+            "Password must contain at least 6 characters.";
+
+        return;
+    }
+
+    // Create the new athlete account
+    const newAthlete = {
+    id: id,
+    name: name,
+    age: age,
+    event: event,
+    category: category,
+    coachId: coachId
+};
+
+    // Save the athlete
+    athletes.push(newAthlete);
+
+    const accountId = athlete.length
+    ? Math.max(...athlete.map(a => a.id)) + 1
+    : 1;
+
+athlete.push({
+    id: accountId,
+    username: username,
+    password: password,
+    role: "ATHLETE",
+    athleteId: id
+});
+
+    // Show success message
+    message.className = "";
+    message.textContent =
+        "Athlete added successfully! Login account created.";
+
+    // Clear the form
+    e.target.reset();
+}
+
+        function addSessionView() {
+            return `
+                <div class="card">
+                    <h2>Add training session</h2>
+
+                    <form id="sf">
+                        <div class="grid">
+                            <div>
+                                <label for="sa">Athlete</label>
+
+                                <select id="sa">
+                                    ${visibleAthletes().map(a => `
+    <option value="${a.id}">
+        ${a.id} — ${esc(a.name)}
+    </option>
+`).join("")}
+                                </select>
+                            </div>
+
+                            ${field(
+                                "sd",
+                                "Session date",
+                                "date",
+                                `value="${iso(today())}"`
+                            )}
+
+                            ${field(
+                                "st",
+                                "Session type",
+                                "text",
+                                'value="TRAINING"'
+                            )}
+
+                            ${field(
+                                "sdu",
+                                "Duration (minutes)",
+                                "number",
+                                "min=1 step=any"
+                            )}
+
+                            ${field(
+                                "sr",
+                                "RPE (0–10)",
+                                "number",
+                                "min=0 max=10 step=any"
+                            )}
+
+                            ${field(
+                                "ss",
+                                "Sprint time (seconds)",
+                                "number",
+                                "min=0 step=any"
+                            )}
+
+                            ${field(
+                                "sdi",
+                                "Distance (km)",
+                                "number",
+                                "min=0 step=any"
+                            )}
+
+                            ${field(
+                                "sw",
+                                "Weight lifted (kg)",
+                                "number",
+                                "min=0 step=any"
+                            )}
+
+                            ${field(
+                                "sh",
+                                "Average heart rate",
+                                "number",
+                                "min=0 step=any"
+                            )}
+                        </div>
+
+                        <p id="sm" role="status"></p>
+
+                        <button class="btn" type="submit">
+                            Add session
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function submitSession(e) {
+            e.preventDefault();
+
+            const selectedAthleteId = Number($("#sa").value);
+
+const allowed = visibleAthletes().some(
+    a => a.id === selectedAthleteId
+);
+
+if (!allowed) {
+    alert("You cannot add a session for this athlete.");
+    return;
+}
+
+            const message = $("#sm");
+            const rpe = +$("#sr").value;
+
+            if (rpe < 0 || rpe > 10) {
+                message.className = "err";
+                message.textContent =
+                    "RPE must be between 0 and 10.";
+                return;
+            }
+
+            const session = {
+                id: nextId++,
+                athleteId: selectedAthleteId,
+                date: $("#sd").value,
+                type: $("#st").value.trim(),
+                duration: +$("#sdu").value,
+                rpe,
+                sprint: +$("#ss").value,
+                distance: +$("#sdi").value,
+                weight: +$("#sw").value,
+                hr: +$("#sh").value
+            };
+
+            sessions.push(session);
+
+            message.className = "";
+
+            message.textContent =
+                "Training session added. Calculated workload = " +
+                f2(workload(session)) +
+                " AU.";
+        }
+
+        render();
+    </script>
+</body>
+</html>
