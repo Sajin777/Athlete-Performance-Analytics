@@ -59,10 +59,10 @@ The proposed system combines:
 - Java
 - JDBC
 - Oracle Database
-- SQL
-- PL/SQL
+- MySQL
+- MySQL Workbench
 
-The Java application communicates with Oracle through JDBC.
+The Java application communicates with MySQL through JDBC.
 
 ## 5. Main Features
 
@@ -89,9 +89,8 @@ The Java application communicates with Oracle through JDBC.
 
 - Java
 - JDBC
-- Oracle Database
-- SQL
-- PL/SQL
+- MySQL Database
+- MySQL Workbench
 - VS Code
 - GitHub
 
@@ -131,9 +130,9 @@ Java Application
  ↓
 JDBC
  ↓
-Oracle Database
+MySQL Database
  ↓
-SQL / PL-SQL
+MySQL Workbench
  ↓
 Analytics
  ↓
