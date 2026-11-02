@@ -2,7 +2,7 @@
 
 ## 1. Project Description
 
-The Athlete Performance Analytics Dashboard is a Java and Oracle
+The Athlete Performance Analytics Dashboard is a Java and MySQL
 DBMS-based application designed to help coaches and athletes
 record, monitor and analyze sports performance.
 
@@ -134,14 +134,16 @@ MySQL Database
  ↓
 MySQL Workbench
  ↓
+Node.js
+ ↓
 Analytics
  ↓
-Java Dashboard
+Dashboard
 
 ## 10. How to Run
 
 1. Create the Oracle database/schema.
-2. Execute the SQL files in the database folder.
+2. Execute the MySQL files in the MySQL Workbench database.
 3. Add ojdbc11.jar to java-app/lib.
 4. Configure database credentials.
 5. Compile the Java program.
